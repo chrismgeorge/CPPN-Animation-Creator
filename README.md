@@ -6,10 +6,10 @@ The only major difference at this point is I removed the IPython dependency, and
 
 ### Dependencies
 I am currently using:
-#### numpy '1.14.5'
-#### tensorflow '1.11.0'
-#### cv2 '3.4.1'
-#### PIL '5.2.0'
+##### numpy '1.14.5'
+##### tensorflow '1.11.0'
+##### cv2 '3.4.1'
+##### PIL '5.2.0'
 
 ### Run
 `run.py` will run with default values for everything and output a video 720p video to `videos/please_name_me.mp4`.
