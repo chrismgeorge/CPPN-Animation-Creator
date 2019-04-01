@@ -15,10 +15,7 @@ I am currently using:
 `run.py` will run with default values for everything and output a video 720p video to `videos/please_name_me.mp4`.
 
 ### Arguments
-`python3.6 run.py --x_dim=1080 --y_dim=720 --z_dim=12 --scale=8 \
- --neurons_per_layer=12 --number_of_layers=7 --color_channels=3 \
- --number_of_stills=4 --interpolations_per_image=12
- --file_name=./videos/please_name_me.mp4`
+`python3.6 run.py --x_dim=1080 --y_dim=720 --z_dim=12 --scale=8 --neurons_per_layer=12 --number_of_layers=7 --color_channels=3 --number_of_stills=4 --interpolations_per_image=12 --file_name=./videos/please_name_me.mp4`
 
 ### Todos
 1) I'd like to add the ability to change the structure of the network even more, so allowing you to input a string like, 'tanh-softplus-tanh' or something, and then the network generate from said string.
