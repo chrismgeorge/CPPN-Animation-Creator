@@ -1,6 +1,7 @@
 import tensorflow as tf
 import numpy as np
 from PIL import Image
+import os
 import cv2
 
 class CPPN():
@@ -30,6 +31,8 @@ class CPPN():
         self.sess.run(self.init)
 
         self.nn = None
+
+        self.saver = tf.train.Saver(tf.all_variables())
 
     # A hidden layer in a nueral network
     def fully_connected_layer(self, name, inputs, output_dim):
@@ -102,7 +105,26 @@ class CPPN():
             img_data = np.array(img_data.reshape((self.y_dim,
                                                   self.x_dim))*255.0,
                                                   dtype=np.uint8)
+            img_data = np.repeat(img_data[:, :, np.newaxis], 3, axis=2)
+
         return img_data
+
+    def save_model(self, model_name='model.ckpt', epoch=0):
+        checkpoint_path = os.path.join('saved_models', model_name)
+        self.saver.save(self.sess, checkpoint_path, global_step=epoch)
+        print('Saving the model! The model is at %s' % checkpoint_path)
+
+    def load_model(self, model_name='model.ckpt', epoch=0):
+        self.saver.restore(self.sess, './saved_models/%s-%d' % (model_name, epoch))
+        print("Model loaded!")
+
+    def save_png(self, params, filename):
+        x_vec, y_vec, r_mat = self.coordinates()
+        im = self.to_image(self.sess.run(self.nn,
+                           feed_dict={self.X: x_vec, self.Y: y_vec,
+                                      self.R:r_mat, self.Z:params}))
+        im = Image.fromarray(im)
+        im.save(filename)
 
     def save_mp4(self, all_zs, filename):
         x_vec, y_vec, r_mat = self.coordinates()
@@ -131,10 +153,10 @@ class CPPN():
                 print("processing image ", i)
 
         # Loop by adding a reverse of the list onto the images list
-        revImages = list(images)
-        revImages.reverse()
-        revImages = revImages[1:]
-        images = images+revImages
+        # revImages = list(images)
+        # revImages.reverse()
+        # revImages = revImages[1:]
+        # images = images+revImages
 
         # Make a mp4 of the image size at 24 fps
         fourcc = cv2.VideoWriter_fourcc(*'MP4V')
