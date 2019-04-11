@@ -36,18 +36,21 @@ def main(x_dim, y_dim, z_dim, scale, neurons_per_layer, number_of_layers,
     cppn.neural_net(True)
     ###########################################################################
 
+    # If you want to make an image, use .png, video use .mp4
+    file_name = ''
+
     ### Save CPPN if you want to. Change the name if you don't want to override a
     ### previous model.
     # cppn.save_model('new_model')
 
 
     ### Load the correct CPPN based on the name you saved.
-    cppn.load_model('new_model')
+    # cppn.load_model('new_model')
+
 
     ### Save single random image
     # z = np.random.uniform(-1.0, 1.0, size=(z_dim)).astype(np.float32)
     # cppn.save_png(z, file_name)
-
     # # Can additionally save latent vector with
     # with open('outfile', 'wb') as f: # 'outfile' can be renamed
     #     pickle.dump([z.tolist()], f)
@@ -89,10 +92,10 @@ def main(x_dim, y_dim, z_dim, scale, neurons_per_layer, number_of_layers,
 
 
     ### Make a list of random video
-    zs = [] # list of latent vectors
-    for i in range(number_of_stills):
-        zs.append(np.random.uniform(-1.0, 1.0, size=(z_dim)).astype(np.float32))
-    cppn.save_mp4(zs, file_name)
+    # zs = [] # list of latent vectors
+    # for i in range(number_of_stills):
+    #     zs.append(np.random.uniform(-1.0, 1.0, size=(z_dim)).astype(np.float32))
+    # cppn.save_mp4(zs, file_name)
 
 
 if __name__ == '__main__':
