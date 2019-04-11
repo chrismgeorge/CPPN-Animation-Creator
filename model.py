@@ -126,7 +126,7 @@ class CPPN():
         im = Image.fromarray(im)
         im.save(filename)
 
-    def save_mp4(self, all_zs, filename):
+    def save_mp4(self, all_zs, filename, loop=True):
         x_vec, y_vec, r_mat = self.coordinates()
 
         total_frames = self.interpolations_per_image + 2
@@ -153,10 +153,11 @@ class CPPN():
                 print("processing image ", i)
 
         # Loop by adding a reverse of the list onto the images list
-        # revImages = list(images)
-        # revImages.reverse()
-        # revImages = revImages[1:]
-        # images = images+revImages
+        if loop:
+            revImages = list(images)
+            revImages.reverse()
+            revImages = revImages[1:]
+            images = images+revImages
 
         # Make a mp4 of the image size at 24 fps
         fourcc = cv2.VideoWriter_fourcc(*'MP4V')

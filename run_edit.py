@@ -13,12 +13,12 @@ def parseArguments():
     parser.add_argument("--z_dim", type=int, default=3)
     parser.add_argument("--scale", type=int, default=8)
 
-    parser.add_argument("--neurons_per_layer", type=int, default=20)
-    parser.add_argument("--number_of_layers", type=int, default=3)
+    parser.add_argument("--neurons_per_layer", type=int, default=12)
+    parser.add_argument("--number_of_layers", type=int, default=4)
     parser.add_argument("--color_channels", type=int, default=1)
 
-    parser.add_argument("--number_of_stills", type=int, default=3)
-    parser.add_argument("--interpolations_per_image", type=int, default=6)
+    parser.add_argument("--number_of_stills", type=int, default=5)
+    parser.add_argument("--interpolations_per_image", type=int, default=48)
     parser.add_argument("--file_name", type=str, default='./videos/test01.mp4')
 
     # Parse arguments
@@ -37,7 +37,8 @@ def main(x_dim, y_dim, z_dim, scale, neurons_per_layer, number_of_layers,
     ###########################################################################
 
     # If you want to make an image, use .png, video use .mp4
-    file_name = ''
+    ### Edit this for each run
+    file_name = './photos/cool_black_and_white.mp4'
 
     ### Save CPPN if you want to. Change the name if you don't want to override a
     ### previous model.
@@ -95,7 +96,7 @@ def main(x_dim, y_dim, z_dim, scale, neurons_per_layer, number_of_layers,
     # zs = [] # list of latent vectors
     # for i in range(number_of_stills):
     #     zs.append(np.random.uniform(-1.0, 1.0, size=(z_dim)).astype(np.float32))
-    # cppn.save_mp4(zs, file_name)
+    # cppn.save_mp4(zs, file_name, loop=True) # set to false if you don't want a loop
 
 
 if __name__ == '__main__':
