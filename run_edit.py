@@ -10,10 +10,10 @@ def parseArguments():
     # Optional arguments
     parser.add_argument("--x_dim", type=int, default=1280)
     parser.add_argument("--y_dim", type=int, default=720)
-    parser.add_argument("--z_dim", type=int, default=3)
+    parser.add_argument("--z_dim", type=int, default=5)
     parser.add_argument("--scale", type=int, default=8)
 
-    parser.add_argument("--neurons_per_layer", type=int, default=12)
+    parser.add_argument("--neurons_per_layer", type=int, default=6)
     parser.add_argument("--number_of_layers", type=int, default=4)
     parser.add_argument("--color_channels", type=int, default=1)
 
@@ -46,7 +46,7 @@ def main(x_dim, y_dim, z_dim, scale, neurons_per_layer, number_of_layers,
 
 
     ### Load the correct CPPN based on the name you saved.
-    # cppn.load_model('new_model')
+    cppn.load_model('new_model')
 
 
     ### Save single random image
@@ -59,15 +59,15 @@ def main(x_dim, y_dim, z_dim, scale, neurons_per_layer, number_of_layers,
 
     ### Make 100 random images and save their latent vectors
     # With a specific model loaded
-    # z_vectors = []
-    # for i in range(100):
-    #     file_name = './photos/test%d.png' % i
-    #     z_vectors = np.random.uniform(-1.0, 1.0, size=(z_dim)).astype(np.float32)
-    #     cppn.save_png(z_vectors, file_name)
-    #     zs.append(z.tolist())
-    #     print('Done! The image is at %s' % file_name)
-    # with open('outfile', 'wb') as f: # can change 'outfile'
-    #     pickle.dump(zs, f)
+    zs = []
+    for i in range(100):
+        file_name = './photos/test%d.png' % i
+        z_vector = np.random.uniform(-1.0, 1.0, size=(z_dim)).astype(np.float32)
+        cppn.save_png(z_vector, file_name)
+        zs.append(z_vector.tolist())
+        print('Done! The image is at %s' % file_name)
+    with open('outfile', 'wb') as f: # can change 'outfile'
+        pickle.dump(zs, f)
 
 
     ### Re-display a specific image from a saved model.
