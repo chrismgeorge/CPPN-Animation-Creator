@@ -51,15 +51,14 @@ with open('outfile', 'wb') as f: # 'outfile' can be renamed
 * Make 100 random images and save their latent vectors
 ```
 # With a specific model loaded
-z_vectors = []
+zs = []
 for i in range(100):
     file_name = './photos/test%d.png' % i
-    z_vectors = np.random.uniform(-1.0, 1.0, size=(z_dim)).astype(np.float32)
-    cppn.save_png(z_vectors, file_name)
-    zs.append(z.tolist())
+    z_vector = np.random.uniform(-1.0, 1.0, size=(z_dim)).astype(np.float32)
+    cppn.save_png(z_vector, file_name)
+    zs.append(z_vector.tolist())
     print('Done! The image is at %s' % file_name)
-
-with open('outfile', 'wb') as f: # 'outfile' can be renamed
+with open('outfile', 'wb') as f: # can change 'outfile'
     pickle.dump(zs, f)
 ```
 You can view the images in `photos/` and you will see next how to retrieve the corresponding latent vectors.
