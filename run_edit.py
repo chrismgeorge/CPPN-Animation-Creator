@@ -78,36 +78,38 @@ def main(x_dim, y_dim, z_dim, scale, neurons_per_layer, number_of_layers,
     ###########################################################################
 
     # (1) Uncomment the functions to perform their actions.
+    # (2) Change any variable names to your preferred name.
+    # (3) Run code!
 
-    # Change name to save a new model.
+    ## Change name to save a new model.
     model_name = 'new_model_3'
 
-    # Save CPPN if you want to.
+    ## Save CPPN if you want to.
     # cppn.save_model(model_name)
 
-    # Load a saved CPPN
+    ## Load a saved CPPN
     cppn.load_model(model_name)
 
-    # Save single random image
+    ## Save single random image
     file_name = './photos/000.png'
     # save_single_random_image(cppn, file_name, z_dim)
 
-    # Make 100 random images and save their latent vectors
+    ## Make 100 random images and save their latent vectors
     # save_many_images(cppn, z_dim)
 
-    # Re-display a specific image from a saved model.
+    ## Re-display a specific image from a saved model.
     outfile = 'outfile'
     index = 0
     file_name = 'rename_me.png'
     # redisplay_image(cppn, outfile, index, file_name)
 
-    # Wibble around a specific image and make a video from it.
+    ## Wibble around a specific image and make a video from it.
     outfile = 'outfile'
     index = 108
     file_name = './videos/new_video.mp4'
-    wibble_around_image(cppn, outfile, index, file_name, z_dim)
+    # wibble_around_image(cppn, outfile, index, file_name, z_dim)
 
-    ### Make a list of random video
+    ## Make a list of random video
     file_name = './videos/random_video.mp4'
     # make_random_video(cppn, file_name, z_dim)
 
