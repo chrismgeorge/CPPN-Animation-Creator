@@ -3,6 +3,7 @@ import numpy as np
 from PIL import Image
 import os
 import cv2
+import pickle
 
 class CPPN():
     def __init__(self, x_dim, y_dim, z_dim, scale, neurons_per_layer, number_of_layers,
@@ -33,6 +34,10 @@ class CPPN():
         self.nn = None
 
         self.saver = tf.train.Saver(tf.all_variables())
+
+        self.curImage = None
+        self.scales = []
+        self.times = []
 
     # A hidden layer in a nueral network
     def fully_connected_layer(self, name, inputs, output_dim):
@@ -70,8 +75,8 @@ class CPPN():
         sp_layer = self.fully_connected_layer('g_softplus_1', H, self.neurons_per_layer)
         H = tf.nn.softplus(sp_layer)
 
-        for i in range(self.number_of_layers):
-            H = self.fully_connected_layer('g_tanh_'+str(i), H, self.neurons_per_layer)
+        for j in range(self.number_of_layers):
+            H = self.fully_connected_layer('g_tanh_'+str(j), H, self.neurons_per_layer)
             H = tf.nn.tanh(H)
 
         H = self.fully_connected_layer('g_final', H, self.color_channels)
@@ -114,40 +119,64 @@ class CPPN():
         self.saver.save(self.sess, checkpoint_path, global_step=epoch)
         print('Saving the model! The model is at %s' % checkpoint_path)
 
+        data = [self.x_dim, self.y_dim, self.z_dim, self.scale,
+                self.neurons_per_layer, self.number_of_layers, self.color_channels]
+        outfile_name = model_name + 'meta_data'
+
+        with open(outfile_name, 'wb') as f: # can change 'outfile'
+            pickle.dump(data, f)
+        print('Saved meta data')
+
     def load_model(self, model_name='model.ckpt', epoch=0):
         self.saver.restore(self.sess, './saved_models/%s-%d' % (model_name, epoch))
         print("Model loaded!")
 
-    def save_png(self, params, filename):
+    def save_png(self, params, filename, save=True):
         x_vec, y_vec, r_mat = self.coordinates()
         im = self.to_image(self.sess.run(self.nn,
                            feed_dict={self.X: x_vec, self.Y: y_vec,
                                       self.R:r_mat, self.Z:params}))
         im = Image.fromarray(im)
-        im.save(filename)
+        self.curImage = im
+        if save:
+            im.save(filename)
 
-    def save_mp4(self, all_zs, filename, loop=True):
-        x_vec, y_vec, r_mat = self.coordinates()
+    def save_mp4(self, all_zs, filename, loop=True, linear=False, scale_me=False, times=False):
 
-        total_frames = self.interpolations_per_image + 2
         images = []
 
         for i in range(len(all_zs)-1):
+            if (times == True):
+                self.interpolations_per_image = self.times[i]
+            total_frames = self.interpolations_per_image + 2
+            if (scale_me == True):
+                s1 = self.scales[i]
+                s2 = self.scales[i+1]
+                delta_s = (s2-s1) / (self.interpolations_per_image + 1)
             # Get the current and next z vectors
             z1 = all_zs[i]
             z2 = all_zs[i+1]
+            if (linear):
+                delta_z = (z2-z1) / (self.interpolations_per_image + 1)
             for i in range(total_frames):
+                if (scale_me == True):
+                    self.scale = s1 + delta_s*i
                 # Calculate looping like in the distill article
-                t = i / total_frames / 2
-                t = (1.0-np.cos(2.0*np.pi*t))/2.0
-                params = z1*(1.0-t) + z2*t
-                params *= 1.0 + t*(1.0-t)
+                if (linear):
+                    z = z1 + delta_z*i
+                else:
+                    t = i / total_frames / 2
+                    t = (1.0-np.cos(2.0*np.pi*t))/2.0
+                    z = z1*(1.0-t) + z2*t
+                    z *= (1.0 + t*(1.0-t))
+
+                x_vec, y_vec, r_mat = self.coordinates()
 
                 # Run the network, turn the output into an image and add it to
                 # the image list, images
                 image = self.to_image(self.sess.run(self.nn,
                                  feed_dict={self.X: x_vec, self.Y: y_vec,
-                                            self.R:r_mat, self.Z:params}))
+                                            self.R:r_mat, self.Z:z}))
                 images.append(image)
 
                 print("processing image ", i)
