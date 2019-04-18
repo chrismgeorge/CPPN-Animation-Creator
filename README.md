@@ -63,7 +63,7 @@ layers = list(range(7,8))
 ```
 
 # gui
-Run `gui.py` like so to create create load a model and visualize the latent space
+Run `gui.py` like so to load a model and visualize the latent space
 ```
 python3.6 gui.py --model_name=7-7-7-2_ --outfile=test_many --model_dir=many_models/models
 python3.6 gui.py --model_name=new_model --outfile=test_out --model_dir=saved_models
