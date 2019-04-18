@@ -46,17 +46,21 @@ cppn.load_model('new_model')
 
 # make_many_models
 Edit the following variables inside the code to make a series of different models
-## Variables for different images
-* x_dim = 1440
-* y_dim = 1080
-* scale = 8
-* color_channels = 1
-* interpolations_per_image = 1
+### Variables for different images
+```
+x_dim = 1440
+y_dim = 1080
+scale = 8
+color_channels = 1
+interpolations_per_image = 1
+```
 
-## Edit these to make specific types of models
-* zs = list(range(7, 8))
-* neurons = list(range(7,8))
-* layers = list(range(7,8))
+### Edit these to make specific types of models
+```
+zs = list(range(7, 8))
+neurons = list(range(7,8))
+layers = list(range(7,8))
+```
 
 # gui
 Run `gui.py` like so to create create load a model and visualize the latent space
