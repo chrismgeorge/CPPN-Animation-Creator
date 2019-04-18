@@ -97,20 +97,20 @@ def make_gui_video(cppn, outfile, file_name):
 
     zs = []
     scales = []
-    times = [56, 6, 48, 6, 56, 6, 12, 6, 12, 6, 12, 6, 56, 6, 12, 6, 12, 6, 12, 6, 56, 6, 128, 90]
+    #times = [56, 6, 48, 6, 56, 6, 12, 6, 12, 6, 12, 6, 56, 6, 12, 6, 12, 6, 12, 6, 56, 6, 128, 90]
 
     for i in range(len(reloaded_vectors)): # how many 'key frames' you want
         zs.append(np.array(reloaded_vectors[i][0:-1]))
         scales.append(reloaded_vectors[i][-1])
 
     cppn.scales = scales
-    cppn.times = times
-    cppn.save_mp4(zs, file_name, loop=False, linear=False, scale_me=True, times=True)
+    #cppn.times = times
+    cppn.save_mp4(zs, file_name, loop=False, linear=False, scale_me=True, times=False)
 
 def make_gui_video_from_mutliple(cppn, outfiles, file_name):
     zs = []
     scales = []
-    times = [56, 6, 48, 6, 56, 6, 14, 6, 14, 6, 14, 6, 56, 6, 14, 6, 14, 6, 14, 6, 64, 6, 128, 256]
+    # times = [56, 6, 48, 6, 56, 6, 14, 6, 14, 6, 14, 6, 56, 6, 14, 6, 14, 6, 14, 6, 64, 6, 128, 256]
     for outfile in outfiles:
         with open (outfile, 'rb') as fp: # 'outfile' can be renamed
             reloaded_vectors = pickle.load(fp)
@@ -121,8 +121,8 @@ def make_gui_video_from_mutliple(cppn, outfiles, file_name):
     print(len(times), len(scales))
 
     cppn.scales = scales
-    cppn.times = times
-    cppn.save_mp4(zs, file_name, loop=False, linear=False, scale_me=True, times=True)
+    #cppn.times = times
+    cppn.save_mp4(zs, file_name, loop=False, linear=False, scale_me=True, times=False)
 
 def main(x_dim, y_dim, z_dim, scale, neurons_per_layer, number_of_layers,
          color_channels, number_of_stills, interpolations_per_image, file_name):
@@ -143,7 +143,7 @@ def main(x_dim, y_dim, z_dim, scale, neurons_per_layer, number_of_layers,
     to_run = 9
 
     ## Save CPPN if you want to.
-    cppn.save_model(model_name)
+    cppn.save_model(model_name=model_name, save_outfile=True)
 
     ## Load a saved CPPN
     #cppn.load_model(model_name)

@@ -30,6 +30,7 @@ I am currently using:
 
 # run_edit
 Inside of run_edit.py you can modify it to do what you want, on top of changing arguements. Here are some things you can do.
+
 * Save a specific model
 ```
 cppn.save_model('new_model')
@@ -38,61 +39,31 @@ cppn.save_model('new_model')
 ```
 cppn.load_model('new_model')
 ```
-* Save single random image
-```
-# With a specific model loaded
-z = np.random.uniform(-1.0, 1.0, size=(z_dim)).astype(np.float32)
-cppn.save_png(z, file_name)
 
-# Can additionally save latent vector with
-with open('outfile', 'wb') as f: # 'outfile' can be renamed
-    pickle.dump([z.tolist()], f)
-```
-* Make 100 random images and save their latent vectors
-```
-# With a specific model loaded
-zs = []
-for i in range(100):
-    file_name = './photos/test%d.png' % i
-    z_vector = np.random.uniform(-1.0, 1.0, size=(z_dim)).astype(np.float32)
-    cppn.save_png(z_vector, file_name)
-    zs.append(z_vector.tolist())
-    print('Done! The image is at %s' % file_name)
-with open('outfile', 'wb') as f: # can change 'outfile'
-    pickle.dump(zs, f)
-```
-You can view the images in `photos/` and you will see next how to retrieve the corresponding latent vectors.
-* Re-display a specific image from a saved model.
-```
-# With a specific model loaded
-with open ('outfile', 'rb') as fp: # 'outfile' can be renamed
-    reloaded_vectors = pickle.load(fp)
-z = np.array(reloaded_vectors[10]) # would be named test10.png
-cppn.save_png(z, file_name) # make sure you name this something you'll remember
-```
-* Wibble around a specific image and make a video from it.
-```
-# With a specific model loaded
-with open ('outfile', 'rb') as fp: # 'outfile' can be renamed
-    reloaded_vectors = pickle.load(fp)
-z_start = np.array(reloaded_vectors[10]) # would be named test10.png
-zs = []
-for i in range(10): # how many 'key frames' you want
-    z = np.random.uniform(-.1, .1, size=(z_dim)).astype(np.float32)
-    z = np.add(z_start, z)
-    zs.append(z)
-    print('Done! The image is at %s' % file_name)
-cppn.save_mp4(zs, file_name) # make sure this is named correctly
-```
-* Make a random video
-```
-zs = [] # list of latent vectors
-for i in range(number_of_stills):
-    zs.append(np.random.uniform(-1.0, 1.0, size=(z_dim)).astype(np.float32))
-cppn.save_mp4(zs, file_name)
-```
-
+* Set the `model_name`, and `to_run` variables to the values you wish.
+* Set the variables inside of the conditionals for the specific `to_run` you are using.
 * If you change any arguements, like color channel, or network size, then you're going to have to create a new model, save it, and reload it.
+
+# make_many_models
+Edit the following variables inside the code to make a series of different models
+## Variables for different images
+* x_dim = 1440
+* y_dim = 1080
+* scale = 8
+* color_channels = 1
+* interpolations_per_image = 1
+
+## Edit these to make specific types of models
+* zs = list(range(7, 8))
+* neurons = list(range(7,8))
+* layers = list(range(7,8))
+
+# gui
+Run `gui.py` like so to create create load a model and visualize the latent space
+```
+python3.6 gui.py --model_name=7-7-7-2_ --outfile=test_many --model_dir=many_models/models
+python3.6 gui.py --model_name=new_model --outfile=test_out --model_dir=saved_models
+```
 
 # Todos
 * I'd like to add the ability to change the structure of the network even more, so allowing you to input a string like, 'tanh-softplus-tanh' or something, and then the network generate from said string.

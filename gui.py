@@ -1,14 +1,12 @@
-# Simple enough, just import everything from tkinter.
 from tkinter import *
 import argparse
+import os
 
 import numpy as np
 from model import CPPN
 
 import pickle
 
-#download and install pillow:
-# http://www.lfd.uci.edu/~gohlke/pythonlibs/#pillow
 from PIL import Image, ImageTk
 
 
@@ -18,6 +16,7 @@ def parseArguments():
 
     # Optional arguments
     parser.add_argument("--model_name", type=str, default=None)
+    parser.add_argument("--model_dir", type=str, default=None)
     parser.add_argument("--outfile", type=str, default=None)
 
     # Parse arguments
@@ -33,13 +32,14 @@ class Window(Frame):
     # Define settings upon initialization. Here you can specify
     def __init__(self, x_dim=1280, y_dim=720, z_dim=5, scale=16, neurons_per_layer=6, number_of_layers=8,
          color_channels=1, number_of_stills=5, interpolations_per_image=24, file_name='./p.png',
-         model_name=None, outfile=None, master=None):
+         model_name=None, outfile=None, model_dir=None, master=None):
 
-        if (model_name == None or outfile == None):
+        if (model_name == None or outfile == None or model_dir == None):
             print('Supply a model name and outfile!')
             exit(0)
 
-        outfile_name = model_name + 'meta_data'
+        checkpoint_path = os.path.join(model_dir, model_name)
+        outfile_name = checkpoint_path + 'meta_data'
         with open (outfile_name, 'rb') as fp: # 'outfile' can be renamed
             data = pickle.load(fp)
 
@@ -50,12 +50,13 @@ class Window(Frame):
         neurons_per_layer = data[4]
         number_of_layers = data[5]
         color_channels = data[6]
+        test = data[7]
 
         self.cppn = CPPN(x_dim, y_dim, z_dim, scale, neurons_per_layer, number_of_layers,
-                color_channels, interpolations_per_image)
+                color_channels, interpolations_per_image, test=test)
         self.cppn.neural_net(True)
 
-        self.cppn.load_model(model_name)
+        self.cppn.load_model(model_name=model_name, model_dir=model_dir)
 
         self.outfile = outfile
 
@@ -145,7 +146,8 @@ if __name__ == '__main__':
     root.geometry("1080x800")
 
     #creation of an instance
-    app = Window(model_name=args.model_name, outfile=args.outfile, master=root)
+    app = Window(model_name=args.model_name, outfile=args.outfile,
+                 model_dir=args.model_dir, master=root)
 
     #mainloop
     root.mainloop()

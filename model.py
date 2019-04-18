@@ -7,11 +7,13 @@ import pickle
 
 class CPPN():
     def __init__(self, x_dim, y_dim, z_dim, scale, neurons_per_layer, number_of_layers,
-                 color_channels, interpolations_per_image):
+                 color_channels, interpolations_per_image, test=0):
         self.x_dim = x_dim
         self.y_dim = y_dim
         self.z_dim = z_dim
         self.scale = scale
+        self.test = test
+
         self.neurons_per_layer = neurons_per_layer
         self.number_of_layers = number_of_layers
         self.color_channels = color_channels
@@ -71,17 +73,69 @@ class CPPN():
 
         H = tf.nn.tanh(U)
 
-        # Customize The Outputs Here ########################################
-        sp_layer = self.fully_connected_layer('g_softplus_1', H, self.neurons_per_layer)
-        H = tf.nn.softplus(sp_layer)
+        # Test 1
+        if self.test == 0:
+            sp_layer = self.fully_connected_layer('g_softplus_1', H, self.neurons_per_layer)
+            H = tf.nn.softplus(sp_layer)
 
-        for j in range(self.number_of_layers):
-            H = self.fully_connected_layer('g_tanh_'+str(j), H, self.neurons_per_layer)
-            H = tf.nn.tanh(H)
+            for i in range(self.number_of_layers):
+                H = self.fully_connected_layer('g_tanh_'+str(i), H, self.neurons_per_layer)
+                H = tf.nn.tanh(H)
 
-        H = self.fully_connected_layer('g_final', H, self.color_channels)
+            H = self.fully_connected_layer('g_final', H, self.color_channels)
+            output = 0.5 * tf.sin(H) + 0.5
 
-        output = 0.5 * tf.sin(H) + 0.5
+        ## Test 2
+        elif self.test == 1:
+            for i in range(self.number_of_layers):
+                H = self.fully_connected_layer('g_tanh_'+str(i), H, self.neurons_per_layer)
+                H = tf.nn.tanh(H)
+
+            H = self.fully_connected_layer('g_final', H, self.color_channels)
+            output = tf.sigmoid(H)
+
+        ## Test 3
+        elif self.test == 2:
+            for i in range(self.number_of_layers):
+                H = self.fully_connected_layer('g_tanh_'+str(i), H, self.neurons_per_layer)
+                H = tf.nn.tanh(H)
+            H = self.fully_connected_layer('g_final', H, self.color_channels)
+            output = tf.sqrt(1.0-tf.abs(tf.tanh(H)))
+
+
+        # Test 4
+        elif self.test == 3:
+            for i in range(self.number_of_layers):
+                H = self.fully_connected_layer('g_softplus_1'+str(i), H, self.neurons_per_layer)
+                H = tf.nn.softplus(H)
+                H = self.fully_connected_layer('g_tanh_'+str(i), H, self.neurons_per_layer)
+                H = tf.nn.tanh(H)
+            H = self.fully_connected_layer('g_softplus_2'+str(i+1), H, self.color_channels)
+            H = tf.nn.softplus(H)
+            H = self.fully_connected_layer('g_final', H, self.color_channels)
+            output = tf.sigmoid(H)
+
+        # Test 5
+        elif self.test == 4:
+            for i in range(self.number_of_layers):
+                H = self.fully_connected_layer('g_softplus_1'+str(i), H, self.neurons_per_layer)
+                H = tf.nn.softplus(H)
+                H = self.fully_connected_layer('g_tanh_'+str(i), H, self.neurons_per_layer)
+                H = tf.nn.tanh(H)
+            H = self.fully_connected_layer('g_softplus_2'+str(i+1), H, self.color_channels)
+            H = tf.nn.softplus(H)
+            H = self.fully_connected_layer('g_final', H, self.color_channels)
+            output = 0.5 * tf.sin(H) + 0.5
+
+        # Test 6
+        elif self.test == 5:
+            for i in range(self.number_of_layers):
+                H = self.fully_connected_layer('g_tanh_'+str(i), H, self.neurons_per_layer)
+                H = H + tf.nn.tanh(H)
+
+            H = self.fully_connected_layer('g_final', H, self.color_channels)
+            output = tf.sigmoid(H)
+
         #####################################################################
 
         self.nn = tf.reshape(output, [self.y_dim, self.x_dim, self.color_channels])
@@ -114,21 +168,24 @@ class CPPN():
 
         return img_data
 
-    def save_model(self, model_name='model.ckpt', epoch=0):
-        checkpoint_path = os.path.join('saved_models', model_name)
+    def save_model(self, model_name='model.ckpt', epoch=0, model_dir='saved_models',
+                  save_outfile=False):
+        checkpoint_path = os.path.join(model_dir, model_name)
         self.saver.save(self.sess, checkpoint_path, global_step=epoch)
         print('Saving the model! The model is at %s' % checkpoint_path)
 
-        data = [self.x_dim, self.y_dim, self.z_dim, self.scale,
-                self.neurons_per_layer, self.number_of_layers, self.color_channels]
-        outfile_name = model_name + 'meta_data'
+        if save_outfile:
+            data = [self.x_dim, self.y_dim, self.z_dim, self.scale,
+                    self.neurons_per_layer, self.number_of_layers,
+                    self.color_channels, self.test]
+            outfile_name = checkpoint_path + 'meta_data'
 
-        with open(outfile_name, 'wb') as f: # can change 'outfile'
-            pickle.dump(data, f)
-        print('Saved meta data')
+            with open(outfile_name, 'wb') as f: # can change 'outfile'
+                pickle.dump(data, f)
+            print('Saved meta data')
 
-    def load_model(self, model_name='model.ckpt', epoch=0):
-        self.saver.restore(self.sess, './saved_models/%s-%d' % (model_name, epoch))
+    def load_model(self, model_name='model.ckpt', epoch=0, model_dir='saved_models'):
+        self.saver.restore(self.sess, './%s/%s-%d' % (model_dir, model_name, epoch))
         print("Model loaded!")
 
     def save_png(self, params, filename, save=True):
@@ -195,3 +252,7 @@ class CPPN():
             video.write(im)
         cv2.destroyAllWindows()
         video.release()
+
+    def close(self):
+        tf.reset_default_graph()
+        self.sess.close()
