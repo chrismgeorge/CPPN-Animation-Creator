@@ -24,8 +24,8 @@ def main():
 
     # Edit these to make specific types of models
     zs = list(range(7, 8))
-    neurons = list(range(7,8))
-    layers = list(range(7,8))
+    neurons = list(range(6,8))
+    layers = list(range(9,11))
 
     tests = [0, 1, 2, 3, 4, 5]
 
@@ -55,11 +55,6 @@ def main():
 
                 print('num/l', number_of_layers, 'neur/l',
                       neurons_per_layer, 'z', z_dim, 'all_tests completed')
-
-
-
-    with open('all_models', 'wb') as f: # 'outfile' can be renamed
-        pickle.dump(all_models, f)
 
 
 if __name__ == '__main__':
