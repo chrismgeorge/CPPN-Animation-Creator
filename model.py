@@ -4,6 +4,7 @@ from PIL import Image
 import os
 import cv2
 import pickle
+import random
 
 class CPPN():
     def __init__(self, x_dim, y_dim, z_dim, scale, neurons_per_layer, number_of_layers,
@@ -110,7 +111,7 @@ class CPPN():
                 H = tf.nn.softplus(H)
                 H = self.fully_connected_layer('g_tanh_'+str(i), H, self.neurons_per_layer)
                 H = tf.nn.tanh(H)
-            H = self.fully_connected_layer('g_softplus_2'+str(i+1), H, self.color_channels)
+            H = self.fully_connected_layer('g_softplus_2', H, self.color_channels)
             H = tf.nn.softplus(H)
             H = self.fully_connected_layer('g_final', H, self.color_channels)
             output = tf.sigmoid(H)
@@ -122,7 +123,7 @@ class CPPN():
                 H = tf.nn.softplus(H)
                 H = self.fully_connected_layer('g_tanh_'+str(i), H, self.neurons_per_layer)
                 H = tf.nn.tanh(H)
-            H = self.fully_connected_layer('g_softplus_2'+str(i+1), H, self.color_channels)
+            H = self.fully_connected_layer('g_softplus_2', H, self.color_channels)
             H = tf.nn.softplus(H)
             H = self.fully_connected_layer('g_final', H, self.color_channels)
             output = 0.5 * tf.sin(H) + 0.5
@@ -142,17 +143,17 @@ class CPPN():
 
     # Get the correct coordinates
     def coordinates(self):
-        x_dim, y_dim, z_dim, scale = self.x_dim, self.y_dim, self.z_dim, self.scale
-        n_points = x_dim * y_dim
-        x_range = scale*(np.arange(self.x_dim)-(x_dim-1)/2.0)/(x_dim-1)/0.5
-        y_range = scale*(np.arange(y_dim)-(y_dim-1)/2.0)/(y_dim-1)/0.5
-        x_mat = np.matmul(np.ones((y_dim, 1)), x_range.reshape((1, x_dim)))
-        y_mat = np.matmul(y_range.reshape((y_dim, 1)), np.ones((1, x_dim)))
-        r_mat = np.sqrt(x_mat*x_mat + y_mat*y_mat)
-        x_mat = np.tile(x_mat.flatten(), 1).reshape(n_points, 1)
-        y_mat = np.tile(y_mat.flatten(), 1).reshape(n_points, 1)
-        r_mat = np.tile(r_mat.flatten(), 1).reshape(n_points, 1)
-        return x_mat, y_mat, r_mat
+        x_dim, y_dim = self.x_dim, self.y_dim
+        N = np.mean((x_dim, y_dim))
+        x = np.linspace(- x_dim / N * self.scale, x_dim / N * self.scale, x_dim)
+        y = np.linspace(- y_dim / N * self.scale, y_dim / N * self.scale, y_dim)
+
+        X, Y = np.meshgrid(x, y)
+
+        x = np.ravel(X).reshape(-1, 1)
+        y = np.ravel(Y).reshape(-1, 1)
+        r = np.sqrt(x ** 2 + y ** 2)
+        return x, y, r
 
     def to_image(self, image_data):
         img_data = np.array(1-image_data)
@@ -188,20 +189,25 @@ class CPPN():
         self.saver.restore(self.sess, './%s/%s-%d' % (model_dir, model_name, epoch))
         print("Model loaded!")
 
-    def save_png(self, params, filename, save=True):
-        x_vec, y_vec, r_mat = self.coordinates()
-        im = self.to_image(self.sess.run(self.nn,
-                           feed_dict={self.X: x_vec, self.Y: y_vec,
-                                      self.R:r_mat, self.Z:params}))
-        im = Image.fromarray(im)
+    def save_png(self, params, filename, save=True, png=False):
+        if png == False:
+            x_vec, y_vec, r_mat = self.coordinates()
+            im = self.to_image(self.sess.run(self.nn,
+                               feed_dict={self.X: x_vec, self.Y: y_vec,
+                                          self.R:r_mat, self.Z:params}))
+            im = Image.fromarray(im)
+        else:
+            im = params
         self.curImage = im
         if save:
             im.save(filename)
 
-    def save_mp4(self, all_zs, filename, loop=True, linear=False, scale_me=False, times=False):
+    def save_mp4(self, all_zs, filename, loop=True, linear=False, scale_me=False,
+                times=False, random_scale=False):
 
         images = []
-
+        currentFrame = 0
+        curScale = 24
         for i in range(len(all_zs)-1):
             if (times == True):
                 self.interpolations_per_image = self.times[i]
@@ -215,9 +221,17 @@ class CPPN():
             z2 = all_zs[i+1]
             if (linear):
                 delta_z = (z2-z1) / (self.interpolations_per_image + 1)
+            if (random_scale == True):
+                prevScale = curScale
+                curScale = random.randint(5, 24)
+                delta_s = (curScale-prevScale) / (self.interpolations_per_image + 1)
+
             for i in range(total_frames):
                 if (scale_me == True):
                     self.scale = s1 + delta_s*i
+                if (random_scale == True):
+                    self.scale = prevScale + delta_s*i
+
                 # Calculate looping like in the distill article
                 if (linear):
                     z = z1 + delta_z*i
@@ -235,6 +249,9 @@ class CPPN():
                                  feed_dict={self.X: x_vec, self.Y: y_vec,
                                             self.R:r_mat, self.Z:z}))
                 images.append(image)
+                # name = './photos/{num:0{width}}'.format(num=currentFrame, width=6)
+                # self.save_png(image, name, png=True)
+                currentFrame += 1
 
                 print("processing image ", i)
 

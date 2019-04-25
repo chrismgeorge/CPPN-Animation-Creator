@@ -19,9 +19,10 @@ def parseArguments():
     parser.add_argument("--number_of_layers", type=int, default=8)
     parser.add_argument("--color_channels", type=int, default=3)
 
-    parser.add_argument("--number_of_stills", type=int, default=5)
+    parser.add_argument("--number_of_stills", type=int, default=10)
     parser.add_argument("--interpolations_per_image", type=int, default=24)
     parser.add_argument("--file_name", type=str, default='./videos/test01.mp4')
+    parser.add_argument("--load_model", type=bool, default=False)
 
     # Parse arguments
     args = parser.parse_args()
@@ -85,11 +86,14 @@ def evolve_image(cppn, outfile, index, new_outfile, folder_name, z_dim):
     with open(new_outfile, 'wb') as f: # can change 'outfile'
         pickle.dump(zs, f)
 
-def make_random_video(cppn, file_name, z_dim):
+def make_random_video(cppn, file_name, number_of_stills, z_dim):
     zs = [] # list of latent vectors
+    z = np.random.uniform(-1.0, 1.0, size=(z_dim)).astype(np.float32)
     for i in range(number_of_stills):
-        zs.append(np.random.uniform(-1.0, 1.0, size=(z_dim)).astype(np.float32))
-    cppn.save_mp4(zs, file_name, loop=True) # set to false if you don't want a loop
+        zs.append(z)
+        z = z + np.random.uniform(-1.0, 1.0, size=(z_dim)).astype(np.float32)
+
+    cppn.save_mp4(zs, file_name, loop=False, random_scale=True) # set to false if you don't want a loop
 
 def make_gui_video(cppn, outfile, file_name):
     with open (outfile, 'rb') as fp: # 'outfile' can be renamed
@@ -102,6 +106,9 @@ def make_gui_video(cppn, outfile, file_name):
     for i in range(len(reloaded_vectors)): # how many 'key frames' you want
         zs.append(np.array(reloaded_vectors[i][0:-1]))
         scales.append(reloaded_vectors[i][-1])
+
+    zs.append(np.array(reloaded_vectors[0][0:-1]))
+    scales.append(reloaded_vectors[0][-1])
 
     cppn.scales = scales
     #cppn.times = times
@@ -125,28 +132,53 @@ def make_gui_video_from_mutliple(cppn, outfiles, file_name):
     cppn.save_mp4(zs, file_name, loop=False, linear=False, scale_me=True, times=False)
 
 def main(x_dim, y_dim, z_dim, scale, neurons_per_layer, number_of_layers,
-         color_channels, number_of_stills, interpolations_per_image, file_name):
+         color_channels, number_of_stills, interpolations_per_image, file_name,
+         load_model):
+    load_model = True
+    ## Change name to save a new model.
+    model_name = '9-17-3-0_'
+    model_dir = 'many_models/models'
 
-    # Initialize CPPN with parameters #########################################
-    print('Initializing CPPN...')
-    cppn = CPPN(x_dim, y_dim, z_dim, scale, neurons_per_layer, number_of_layers,
-                color_channels, interpolations_per_image)
-    cppn.neural_net(True)
-    ###########################################################################
+    if load_model:
+        ## Load a saved CPPN
+        checkpoint_path = os.path.join(model_dir, model_name)
+        outfile_name = checkpoint_path + 'meta_data'
+        with open (outfile_name, 'rb') as fp: # 'outfile' can be renamed
+            data = pickle.load(fp)
 
-    # (1) Uncomment the functions to perform their actions.
+        x_dim = data[0]
+        y_dim = data[1]
+        z_dim = data[2]
+        scale = data[3]
+        neurons_per_layer = data[4]
+        number_of_layers = data[5]
+        color_channels = data[6]
+        test = data[7]
+
+        # Initialize CPPN with parameters ######################################
+        print('Initializing CPPN...')
+        cppn = CPPN(x_dim, y_dim, z_dim, scale, neurons_per_layer, number_of_layers,
+                    color_channels, interpolations_per_image, test=test)
+        cppn.neural_net(True)
+        ########################################################################
+
+        cppn.load_model(model_name=model_name, model_dir=model_dir)
+
+    else:
+        # Initialize CPPN with parameters ######################################
+        print('Initializing CPPN...')
+        cppn = CPPN(x_dim, y_dim, z_dim, scale, neurons_per_layer, number_of_layers,
+                    color_channels, interpolations_per_image, test=test)
+        cppn.neural_net(True)
+        ########################################################################
+
+    # (1) Set to_run
+    to_run = 5
     # (2) Change any variable names to your preferred name.
     # (3) Run code!
 
-    ## Change name to save a new model.
-    model_name = 'test_model'
-    to_run = 9
-
     ## Save CPPN if you want to.
-    cppn.save_model(model_name=model_name, save_outfile=True)
-
-    ## Load a saved CPPN
-    #cppn.load_model(model_name)
+    # cppn.save_model(model_name=model_name, save_outfile=True)
 
     if (to_run == 0):
         ## Save single random image
@@ -177,12 +209,12 @@ def main(x_dim, y_dim, z_dim, scale, neurons_per_layer, number_of_layers,
         evolve_image(cppn, outfile, index, new_outfile, folder_name, z_dim)
     elif (to_run == 5):
         ## Make a list of random video
-        file_name = './videos/random_video.mp4'
-        make_random_video(cppn, file_name, z_dim)
+        file_name = './videos/bw_02.mp4'
+        make_random_video(cppn, file_name, number_of_stills, z_dim)
     elif (to_run == 6):
         ## Make a video using gui data
-        outfile = 'gui_scene_1'
-        file_name = './videos/scene_1.mp4'
+        outfile = '8-19-3-5_'
+        file_name = './videos/bw.mp4'
         make_gui_video(cppn, outfile, file_name)
     elif (to_run == 7):
         ## Make a video using gui data
@@ -197,6 +229,6 @@ if __name__ == '__main__':
     # Run function
     main(args.x_dim, args.y_dim, args.z_dim, args.scale, args.neurons_per_layer,
          args.number_of_layers, args.color_channels, args.number_of_stills,
-         args.interpolations_per_image, args.file_name)
+         args.interpolations_per_image, args.file_name, args.load_model)
 
 

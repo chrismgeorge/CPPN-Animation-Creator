@@ -129,6 +129,7 @@ class Window(Frame):
 
     def showImg(self):
         load = self.cppn.curImage
+        resized = load.resize((800, 600),Image.ANTIALIAS)
         render = ImageTk.PhotoImage(load)
 
         # labels can be text or images
@@ -143,7 +144,7 @@ if __name__ == '__main__':
 
     root = Tk()
 
-    root.geometry("1080x800")
+    root.geometry("2000x1500")
 
     #creation of an instance
     app = Window(model_name=args.model_name, outfile=args.outfile,

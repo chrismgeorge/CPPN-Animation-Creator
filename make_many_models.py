@@ -18,40 +18,43 @@ def main():
     # Variables for different images
     x_dim = 1440
     y_dim = 1080
-    scale = 8
+
     color_channels = 1
     interpolations_per_image = 1
 
     # Edit these to make specific types of models
-    zs = list(range(7, 8))
-    neurons = list(range(6,8))
-    layers = list(range(9,11))
+    zs = list(range(9, 10))
+    neurons = list(range(15, 20))
+    layers = list(range(3, 5))
 
+   # tests = [0, 1, 2, 3, 4, 5]
     tests = [0, 1, 2, 3, 4, 5]
+    scale = 24
 
     for z_dim in zs:
         for neurons_per_layer in neurons:
             for number_of_layers in layers:
                 for t in tests:
+                        # scale = 1
+                        # Make a new CPPN
+                        cppn = CPPN(x_dim, y_dim, z_dim, scale, neurons_per_layer,
+                                    number_of_layers, color_channels,
+                                    interpolations_per_image, test=t)
+                        cppn.neural_net(True)
 
-                    # Make a new CPPN
-                    cppn = CPPN(x_dim, y_dim, z_dim, scale, neurons_per_layer,
-                                number_of_layers, color_channels,
-                                interpolations_per_image, test=t)
-                    cppn.neural_net(True)
+                        dict_key = makeKey(z_dim, neurons_per_layer, number_of_layers, t)
 
-                    dict_key = makeKey(z_dim, neurons_per_layer, number_of_layers, t)
+                        # Save the model
+                        cppn.save_model(model_name=dict_key, model_dir='many_models/models',
+                                        save_outfile=True)
 
-                    # Save the model
-                    cppn.save_model(model_name=dict_key, model_dir='many_models/models',
-                                    save_outfile=True)
-                    z = np.random.uniform(-1.0, 1.0, size=(z_dim)).astype(np.float32)
+                        z = np.random.uniform(-1.0, 1.0, size=(z_dim)).astype(np.float32)
 
-                    # Save a test image
-                    filename = "./many_models/model_images/%s.png" % (dict_key)
-                    cppn.save_png(z, filename, save=True)
+                        # Save a test image
+                        filename = "./many_models/model_images/%s.png" % (dict_key)
+                        cppn.save_png(z, filename, save=True)
 
-                    cppn.close()
+                        cppn.close()
 
                 print('num/l', number_of_layers, 'neur/l',
                       neurons_per_layer, 'z', z_dim, 'all_tests completed')
