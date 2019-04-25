@@ -32,6 +32,7 @@ def getDims(model):
     return x_dim, y_dim
 
 def makeMaskedVideo(main_v, mask_v, model, filename, x_dim, y_dim):
+    FPS = 24.0
     fourcc = cv2.VideoWriter_fourcc(*'MP4V')
     video = cv2.VideoWriter('./videos/'+filename, fourcc, FPS, (x_dim, y_dim), 0)
 
@@ -62,14 +63,14 @@ def makeMaskedVideo(main_v, mask_v, model, filename, x_dim, y_dim):
             # simulate inversion of the masks
             outFrame = np.subtract(frameMask, frameMain)
             outFrame = np.uint8(np.absolute(outFrame))
+
             video.write(outFrame)
 
     cv2.destroyAllWindows()
-        video.release()
+    video.release()
 
 def main(main_v, mask_v, model, filename):
-    FPS = 24.0
-    if (main != None and mask != None and model != None):
+    if (main_v != None and mask_v != None and model != None):
         x_dim, y_dim = getDims(model)
         makeMaskedVideo(main_v, mask_v, model, filename, x_dim, y_dim)
 
