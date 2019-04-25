@@ -22,6 +22,7 @@ I am currently using:
 
 ## make_many_models
 This is called from the command line with `python3.6 make_many_models.py`. When you want to modify what models are created simply edit these variables within the code itself.
+* If you call the same code again, any models that have the same name will be overwritten :(.
 ```
 # Variables for different images
 x_dim = 1440
@@ -39,7 +40,7 @@ scale = 24
 ```
 
 ## run_edit
-* `run_edit.py` is should be called after creating a model from `make_many_models.py`. Call this function and pass in the model name and the function you want to use (either `random_video` or `make_gui_video`).
+* `run_edit.py` should be called after creating a model from `make_many_models.py`. Call this function and pass in the model name and the function you want to use (either `random_video` or `make_gui_video`).
 * You need a file name for the video that will be created.
 * If you are using `make_gui_video` then you need to pass in the outfiles comma seperated that were made from using the gui.
 ```

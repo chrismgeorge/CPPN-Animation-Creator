@@ -22,7 +22,7 @@ def main():
     color_channels = 1
 
     # Edit these to make specific types of models
-    zs = list(range(22, 23))
+    zs = list(range(3, 4))
     neurons = list(range(15, 20))
     layers = list(range(3, 5))
 
