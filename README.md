@@ -11,64 +11,53 @@ I am currently using:
 * cv2 '3.4.1'
 * PIL '5.2.0'
 
-# Run
-`python3.6 run.py` will run with default values for everything and output a video 720p video to `videos/please_name_me.mp4`.
+# Workflow
 
-# Arguments
-`python3.6 run.py --x_dim=1080 --y_dim=720 --z_dim=12 --scale=8 --neurons_per_layer=12 --number_of_layers=7 --color_channels=3 --number_of_stills=4 --interpolations_per_image=12 --file_name=./videos/please_name_me.mp4`
+* Use `make_many_models` to make a ton of different models and see an example test image in `./many_models/model_images`.
+* Look through `./many_models/model_images` and find an image that you like.
+* The image name (up to the .png) is the same as the model name. So if an image is named, `5-13-3-5_.png` then the corresponding model name is `5-13-3-5_`.
+* From here you can now either make a random video in `run_edit.py` or move onto the gui.
+* If you use the gui, you can make a specific custom animation, and then call `run_edit.py` with your specific `outfiles`.
+* Please refer to the corresponding files below to see specifically how to call and use them.
 
-* `x_dim` : the width of the image/video
-* `y_dim` : the height of the image/video
-* `z_dim` : the dimension of the latent vector (larger means more complex images)
-* `scale` : how zoomed in on the coordiantes you are (larger means more zoomed in image)
-* `neurons_per_layer` : how many neurons on in each hidden layer of the neural network (larger means more complex images)
-* `number_of_layers` : how many hidden layers in the neural network (larger means more complex images)
-* `color_channels` : 3 for RGB images/video, 1 for black/white
-* `number_of_stills` : how many latent vectors will be made to create images for the interpolations
-* `interpolations_per_image` : how many images are between each "still"
-* `file_name` : the output file that the video will be saved to
-
-# run_edit
-Inside of run_edit.py you can modify it to do what you want, on top of changing arguements. Here are some things you can do.
-
-* Save a specific model
+## make_many_models
+This is called from the command line with `python3.6 make_many_models.py`. When you want to modify what models are created simply edit these variables within the code itself.
 ```
-cppn.save_model('new_model')
-```
-* Load a specific model
-```
-cppn.load_model('new_model')
-```
-
-* Set the `model_name`, and `to_run` variables to the values you wish.
-* Set the variables inside of the conditionals for the specific `to_run` you are using.
-* If you change any arguements, like color channel, or network size, then you're going to have to create a new model, save it, and reload it.
-
-# make_many_models
-Edit the following variables inside the code to make a series of different models
-### Variables for different images
-```
+# Variables for different images
 x_dim = 1440
 y_dim = 1080
-scale = 8
+
 color_channels = 1
-interpolations_per_image = 1
+
+# Edit these to make specific types of models
+zs = list(range(9, 10))
+neurons = list(range(15, 20))
+layers = list(range(3, 5))
+
+tests = [0, 1, 2, 3, 4, 5] # the different types of networks
+scale = 24
 ```
 
-### Edit these to make specific types of models
+## run_edit
+* `run_edit.py` is should be called after creating a model from `make_many_models.py`. Call this function and pass in the model name and the function you want to use (either `random_video` or `make_gui_video`).
+* You need a file name for the video that will be created.
+* If you are using `make_gui_video` then you need to pass in the outfiles comma seperated that were made from using the gui.
 ```
-zs = list(range(7, 8))
-neurons = list(range(7,8))
-layers = list(range(7,8))
+python3.6 run_edit.py --ml=model_name --fc=function_name --ofs=outfile_names,comma,seperated --fn=out_video_file_name.mp4
 ```
 
 # gui
-Run `gui.py` like so to load a model and visualize the latent space
+* After making a model with `make_many_models.py` you can open the gui by specifying the model name from the image you like, and an outfile, which will store the data.
+* When using the gui, if you click `save data` then those parameters will be saved. When you press `pickle data` all of the data you have saved up to that point will be saved to the outfile name you specified. That name can then be used in `run_edit.py`.
+* Pressing `pickle data` multiple times will override the previous save.
+* If you make multiple outfiles with the same model (opening and closing the window with a new outfile name) then you can string all of those together into a single animations by adding them comma seperated when you call run_edit.py
 ```
-python3.6 gui.py --model_name=7-7-7-2_ --outfile=test_many --model_dir=many_models/models
-python3.6 gui.py --model_name=new_model --outfile=test_out --model_dir=saved_models
+python3.6 gui.py --ml=7-8-7-3_ --of=outfile
 ```
 
-# Todos
-* I'd like to add the ability to change the structure of the network even more, so allowing you to input a string like, 'tanh-softplus-tanh' or something, and then the network generate from said string.
-* Refactor and add in the ability to use a database to train said network, i.e. more refactoring of http://blog.otoro.net/2016/04/01/generating-large-images-from-latent-vectors/
+# masking_videos
+This file will take two (black and white) videos and mask the first video with the second video. It needs the model name from one of the videos for getting the dimensions, and it will output the video into the `./videos/` directory.
+```
+python3.6 masking_videos.py --mn=main_video.mp4 --mk=masking_video.mp4 --ml=model_name --fn=output_video_name.mp4
+```
+

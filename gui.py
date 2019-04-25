@@ -15,9 +15,9 @@ def parseArguments():
     parser = argparse.ArgumentParser()
 
     # Optional arguments
-    parser.add_argument("--model_name", type=str, default=None)
-    parser.add_argument("--model_dir", type=str, default=None)
-    parser.add_argument("--outfile", type=str, default=None)
+    parser.add_argument("--ml", type=str, default=None) # model name
+    parser.add_argument("--model_dir", type=str, default='many_models/models')
+    parser.add_argument("--of", type=str, default=None) # outfile
 
     # Parse arguments
     args = parser.parse_args()
@@ -147,7 +147,7 @@ if __name__ == '__main__':
     root.geometry("2000x1500")
 
     #creation of an instance
-    app = Window(model_name=args.model_name, outfile=args.outfile,
+    app = Window(model_name=args.ml, outfile=args.of,
                  model_dir=args.model_dir, master=root)
 
     #mainloop

@@ -20,23 +20,21 @@ def main():
     y_dim = 1080
 
     color_channels = 1
-    interpolations_per_image = 1
 
     # Edit these to make specific types of models
-    zs = list(range(9, 10))
+    zs = list(range(22, 23))
     neurons = list(range(15, 20))
     layers = list(range(3, 5))
 
-   # tests = [0, 1, 2, 3, 4, 5]
-    tests = [0, 1, 2, 3, 4, 5]
+    tests = [0, 1, 2, 3, 4, 5] # the different types of networks
     scale = 24
 
     for z_dim in zs:
         for neurons_per_layer in neurons:
             for number_of_layers in layers:
                 for t in tests:
-                        # scale = 1
                         # Make a new CPPN
+                        interpolations_per_image = 1
                         cppn = CPPN(x_dim, y_dim, z_dim, scale, neurons_per_layer,
                                     number_of_layers, color_channels,
                                     interpolations_per_image, test=t)

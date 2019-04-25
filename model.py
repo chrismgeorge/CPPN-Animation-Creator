@@ -185,7 +185,8 @@ class CPPN():
                 pickle.dump(data, f)
             print('Saved meta data')
 
-    def load_model(self, model_name='model.ckpt', epoch=0, model_dir='saved_models'):
+    def load_model(self, model_name='model.ckpt', epoch=0,
+                   model_dir='many_models/models'):
         self.saver.restore(self.sess, './%s/%s-%d' % (model_dir, model_name, epoch))
         print("Model loaded!")
 
